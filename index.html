@@ -28,7 +28,7 @@
     const form = document.getElementById('noteForm');
     const message = document.getElementById('message');
     const errorDiv = document.getElementById('error');
-    const gasUrl = 'https://script.google.com/macros/s/AKfycbxj7kA1pg7H_LfteA_c6dNG0BPMGLthY6A3Mr4nMvctcZl9F8AFhw7m1WJUqpQzQR_T/exec'; // Ganti dengan URL GAS baru
+    const gasUrl = 'https://script.google.com/macros/s/AKfycbxD_VyFL0GCC2gVFmpa4ckjh7wweEnx6-Ry3MLgMXiQOofyDdSgzuV-lqeOTHWHJA3s/exec'; // ganti dgn URL GAS kamu
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -37,18 +37,18 @@
       errorDiv.textContent = '';
 
       try {
-        console.log('Mengirim data:', { note });
+        // Gunakan form-urlencoded agar jadi simple request
+        const formData = new URLSearchParams();
+        formData.append('note', note);
+
         const response = await fetch(gasUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ note }),
-          mode: 'cors',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData.toString()
         });
 
-        console.log('Response status:', response.status);
-        console.log('Response headers:', [...response.headers.entries()]);
         const data = await response.json();
-        console.log('Response data:', data);
+        console.log('Response:', data);
 
         if (response.ok && data.status === 'success') {
           message.textContent = 'Note berhasil disimpan!';
@@ -56,13 +56,11 @@
           form.reset();
         } else {
           errorDiv.textContent = `Gagal menyimpan: ${data.error || 'Unknown error'}`;
-          console.error('Error dari server:', data.error);
         }
       } catch (error) {
         errorDiv.textContent = `Error: ${error.message}`;
-        console.error('Fetch error:', error);
         if (error.message.includes('Failed to fetch')) {
-          errorDiv.textContent += ' (Periksa URL GAS, deployment, atau koneksi internet)';
+          errorDiv.textContent += ' (Cek URL GAS atau koneksi internet)';
         }
       }
     });
